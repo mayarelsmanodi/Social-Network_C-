@@ -1,0 +1,963 @@
+#include <bits/stdc++.h>
+#include "tinyxml2.h"
+using namespace std;
+using namespace tinyxml2;
+
+class user;
+deque <user> no;
+int state;
+int post_no_on_home; //that variable will be used in state  <certain post>
+int post_no_on_my_profile;
+int post_no_on_x_profile;
+int no_of_profile_i_want_to_see;
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+XMLDocument xmlDoc;
+//load variables
+XMLElement * p_user_to_save;
+XMLElement * pListElement=nullptr;
+XMLElement * pList_of_comment;
+XMLElement *pRoot;
+XMLElement *tmp_to_user;
+XMLElement *user_name_and_password;
+XMLNode *root;
+XMLElement * pElement;
+XMLElement * pList_of_like;
+//save variables
+XMLNode *main_node;
+XMLElement *p_on_user;
+XMLElement *p_on_home;
+XMLElement *p_on_user_index;
+int index_to_compare;
+XMLElement *p_on_post;
+XMLElement *p_on_friends_index;
+XMLElement *p_on_f_index;
+
+struct comment
+{
+    int user_index;
+    int comment_index;
+    string user_name;
+    string comment_content;
+};
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+struct post
+{
+    int post_index;
+    int user_index;
+    string user_name;
+    string post_content;
+    deque <comment> post_comments;
+    int lik =0;
+};
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+struct user
+{
+    int index;
+    string user_name,password;
+    deque <int> friends_index;
+    deque <int> groups_index;
+    deque <post> home;
+    deque <post> profile;
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void post_on_home()
+    {
+        string extra;
+        post tmp;
+        printf("\n write your post \n");
+        tmp.user_index = index;
+        tmp.user_name = user_name;
+        tmp.post_index = home.size();
+        getline (cin,extra);
+        getline(cin,tmp.post_content);
+        home.push_back(tmp);
+        ///xml part
+        main_node=xmlDoc.FirstChild();
+        p_on_user=main_node->FirstChildElement("user");
+        while (p_on_user!=nullptr)
+        {
+            p_on_user_index=p_on_user->FirstChildElement("user_name_and_password");
+            p_on_user_index->QueryIntAttribute("index",&index_to_compare);
+            if (index_to_compare==index)
+            {
+                break;
+            }
+            p_on_user=p_on_user->NextSiblingElement("user");
+        }
+        p_on_home=p_on_user->FirstChildElement("home");
+        if (p_on_home==nullptr)
+        {
+            p_on_home=xmlDoc.NewElement("home");
+            p_on_user->InsertEndChild(p_on_home);
+        }
+       p_on_post = p_on_home->FirstChildElement("post");
+       int post_ind=0;
+       const char * c;
+       if (p_on_post==nullptr)
+       {
+           p_on_post=xmlDoc.NewElement("post");
+           p_on_post->SetAttribute("post_ind",post_ind);
+           p_on_post->SetAttribute("user_ind",index);
+           c = user_name.c_str();
+           p_on_post->SetAttribute("user_name",c);
+           c = (tmp.post_content).c_str();
+           p_on_post->SetAttribute("post_content",c);
+           p_on_post->SetAttribute("no_of_likes",0);
+           p_on_home->InsertEndChild(p_on_post);
+       }
+       else
+       {
+           while (p_on_post!=nullptr)
+           {
+               post_ind++;
+               p_on_post=p_on_post->NextSiblingElement("post");
+           }
+           p_on_post=xmlDoc.NewElement("post");
+           p_on_post->SetAttribute("post_ind",post_ind);
+           p_on_post->SetAttribute("user_ind",index);
+           p_on_post->SetAttribute("no_of_likes",0);
+           c = user_name.c_str();
+           p_on_post->SetAttribute("user_name",c);
+           c = (tmp.post_content).c_str();
+           p_on_post->SetAttribute("post_content",c);
+           p_on_home->InsertEndChild(p_on_post);
+       }
+       xmlDoc.SaveFile("SavedData.xml");
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    void post_on_profile()
+    {
+        post tmp;
+        string extra;
+        printf("\n write your post \n");
+        tmp.post_index = profile.size();
+        tmp.user_index = index;
+        tmp.user_name = user_name;
+        getline (cin,extra);
+        getline(cin,tmp.post_content);
+        profile.push_back(tmp);
+        ///xml part
+        main_node=xmlDoc.FirstChild();
+        p_on_user=main_node->FirstChildElement("user");
+        while (p_on_user!=nullptr)
+        {
+            p_on_user_index=p_on_user->FirstChildElement("user_name_and_password");
+            p_on_user_index->QueryIntAttribute("index",&index_to_compare);
+            if (index_to_compare==index)
+            {
+                break;
+            }
+            p_on_user=p_on_user->NextSiblingElement("user");
+        }
+        p_on_home=p_on_user->FirstChildElement("profile");
+        if (p_on_home==nullptr)
+        {
+            p_on_home=xmlDoc.NewElement("profile");
+            p_on_user->InsertEndChild(p_on_home);
+        }
+       p_on_post = p_on_home->FirstChildElement("post");
+       int post_ind=0;
+       const char * c;
+       if (p_on_post==nullptr)
+       {
+           p_on_post=xmlDoc.NewElement("post");
+           p_on_post->SetAttribute("post_ind",post_ind);
+           p_on_post->SetAttribute("user_ind",index);
+           c = user_name.c_str();
+           p_on_post->SetAttribute("user_name",c);
+           c = (tmp.post_content).c_str();
+           p_on_post->SetAttribute("post_content",c);
+           p_on_post->SetAttribute("no_of_likes",0);
+           p_on_home->InsertEndChild(p_on_post);
+       }
+       else
+       {
+           while (p_on_post!=nullptr)
+           {
+               post_ind++;
+               p_on_post=p_on_post->NextSiblingElement("post");
+           }
+            p_on_post=xmlDoc.NewElement("post");
+           p_on_post->SetAttribute("post_ind",post_ind);
+           p_on_post->SetAttribute("user_ind",index);
+           c = user_name.c_str();
+           p_on_post->SetAttribute("user_name",c);
+           c = (tmp.post_content).c_str();
+           p_on_post->SetAttribute("post_content",c);
+           p_on_post->SetAttribute("no_of_likes",0);
+           p_on_home->InsertEndChild(p_on_post);
+       }
+       xmlDoc.SaveFile("SavedData.xml");
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    void post_on_x_profile() /*osama*/
+    {
+        post tmp;
+        string extra;
+        printf("\n write your post \n");
+        tmp.post_index = (no[no_of_profile_i_want_to_see].profile).size();
+        tmp.user_index = index;
+        tmp.user_name = user_name;
+        getline (cin,extra);
+        getline(cin,tmp.post_content);
+        (no[no_of_profile_i_want_to_see].profile).push_back(tmp);
+        ///xml part
+         main_node=xmlDoc.FirstChild();
+        p_on_user=main_node->FirstChildElement("user");
+        while (p_on_user!=nullptr)
+        {
+            p_on_user_index=p_on_user->FirstChildElement("user_name_and_password");
+            p_on_user_index->QueryIntAttribute("index",&index_to_compare);
+            if (index_to_compare==no_of_profile_i_want_to_see)
+            {
+                break;
+            }
+            p_on_user=p_on_user->NextSiblingElement("user");
+        }
+        p_on_home=p_on_user->FirstChildElement("profile");
+        if (p_on_home==nullptr)
+        {
+            p_on_home=xmlDoc.NewElement("profile");
+            p_on_user->InsertEndChild(p_on_home);
+        }
+       p_on_post = p_on_home->FirstChildElement("post");
+       int post_ind=0;
+       const char * c;
+       if (p_on_post==nullptr)
+       {
+           p_on_post=xmlDoc.NewElement("post");
+           p_on_post->SetAttribute("post_ind",post_ind);
+           p_on_post->SetAttribute("user_ind",index);
+           c = user_name.c_str();
+           p_on_post->SetAttribute("user_name",c);
+           c = (tmp.post_content).c_str();
+           p_on_post->SetAttribute("post_content",c);
+           p_on_post->SetAttribute("no_of_likes",0);
+           p_on_home->InsertEndChild(p_on_post);
+       }
+       else
+       {
+           while (p_on_post!=nullptr)
+           {
+               post_ind++;
+               p_on_post=p_on_post->NextSiblingElement("post");
+           }
+            p_on_post=xmlDoc.NewElement("post");
+           p_on_post->SetAttribute("post_ind",post_ind);
+           p_on_post->SetAttribute("user_ind",index);
+           c = user_name.c_str();
+           p_on_post->SetAttribute("user_name",c);
+           c = (tmp.post_content).c_str();
+           p_on_post->SetAttribute("post_content",c);
+           p_on_post->SetAttribute("no_of_likes",0);
+           p_on_home->InsertEndChild(p_on_post);
+       }
+       xmlDoc.SaveFile("SavedData.xml");
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    void add_friend()
+    {
+        int choice;
+        cout<<"\nenter the number of the person you want to add:";
+        cin>>choice;
+        friends_index.push_back(choice);
+        (no[choice].friends_index).push_back(index);
+        ///xml part
+        main_node=xmlDoc.FirstChild();
+        p_on_user=main_node->FirstChildElement("user");
+        while (p_on_user!=nullptr)
+        {
+            p_on_friends_index=p_on_user->FirstChildElement("user_name_and_password");
+            p_on_friends_index->QueryIntAttribute("index",&index_to_compare);
+            if (index_to_compare==index)
+            {
+                break;
+            }
+            p_on_user=p_on_user->NextSiblingElement("user");
+        }
+        p_on_friends_index=p_on_user->FirstChildElement("friends_index");
+        if (p_on_friends_index==nullptr)
+        {
+            p_on_friends_index=xmlDoc.NewElement("friends_index");
+            p_on_user->InsertEndChild(p_on_friends_index);
+        }
+        p_on_f_index = xmlDoc.NewElement("f_index");
+        p_on_f_index->SetText(choice);
+        p_on_friends_index->InsertEndChild(p_on_f_index);
+        xmlDoc.SaveFile("SavedData.xml");
+        ///2nd part
+        main_node=xmlDoc.FirstChild();
+        p_on_user=main_node->FirstChildElement("user");
+        while (p_on_user!=nullptr)
+        {
+            p_on_friends_index=p_on_user->FirstChildElement("user_name_and_password");
+            p_on_friends_index->QueryIntAttribute("index",&index_to_compare);
+            if (index_to_compare==choice)
+            {
+                break;
+            }
+            p_on_user=p_on_user->NextSiblingElement("user");
+        }
+        p_on_friends_index=p_on_user->FirstChildElement("friends_index");
+        if (p_on_friends_index==nullptr)
+        {
+            p_on_friends_index=xmlDoc.NewElement("friends_index");
+            p_on_user->InsertEndChild(p_on_friends_index);
+        }
+        p_on_f_index = xmlDoc.NewElement("f_index");
+        p_on_f_index->SetText(index);
+        p_on_friends_index->InsertEndChild(p_on_f_index);
+        xmlDoc.SaveFile("SavedData.xml");
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    int show_home()
+    {
+        int choice;
+        user tmps;
+        for (int i=0 ; i<home.size() ; ++i)
+        {
+            (tmps.home).push_back(home[i]);
+        }
+        for (int i=0;i<friends_index.size();++i)
+        {
+            for (int j=0 ;j<(no[(friends_index[i])].home).size();++j)
+            {
+                (tmps.home).push_back((no[(friends_index[i])].home)[j]);
+            }
+        }
+        for (int i=0;i<(tmps.home).size();++i)
+        {
+            cout<<"\n\n\npost no "<<i;
+            cout<<"\n\nthis post is posted by <" <<(tmps.home)[i].user_name<<"> and his index ("<<(tmps.home)[i].user_index<<")";
+            cout<<"\n\n     "<<(tmps.home)[i].post_content;
+            cout<<"\n\n     ["<<((tmps.home)[i].lik)<<"] likes this post";
+            cout<<"\n\n     comments";
+            for (int j=0;j<((tmps.home)[i].post_comments).size();++j)
+            {
+                cout<<"\n\n";
+                cout<<"   commented by <"<<((tmps.home)[i].post_comments)[j].user_name<<"> and his index ("<<((tmps.home)[i].post_comments)[j].user_index<<")";
+                cout<<"\n\n     "<<((tmps.home)[i].post_comments)[j].comment_content;
+            }
+        }
+        cout<<"\n\n\n1-refresh home  2-see my friend list  3- see my groups list\n";
+        cout<<"4-see my friend requests link  5-make a post  6-react on a post 7-go to profile\n8-log out 9-see suggested friends\nenter your choice:\n";
+        while (1)
+        {
+            cin>>choice;
+            if (choice==1) //refresh home
+            {
+                return 1;
+            }
+            else if (choice==2) //my friends list
+            {
+                return 6;
+            }
+            else if (choice==3) //my groups list
+            {
+                return 5;
+            }
+            else if (choice==4) //my friends request list
+            {
+                return 4;
+            }
+            else if  (choice==5) //make post
+            {
+                this->post_on_home();
+                return 1;
+            }
+            else if (choice==6) //react on post
+            {
+                printf("\n choose number of post to react on\n");
+                cin>>post_no_on_home; //used in certain post state
+                return 7;
+            }
+            else if (choice==7) //go to profile
+            {
+                return 2;
+            }
+            else if (choice==8) //log out
+            {
+                return 9;
+            }
+            else if (choice==9)//see sugested friends
+            {
+                return 10;
+            }
+            else if (choice==10)
+            {
+                   return 3;
+            }
+        }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    int show_my_profile()
+    {
+        int choice;
+        for (int i=0;i<profile.size();++i)
+        {
+            cout<<"\n\n\npost no "<<i;
+            cout<<"\n\nthis post is posted by <" <<profile[i].user_name<<"> and his index ("<<profile[i].user_index<<")";
+            cout<<"\n\n     "<<profile[i].post_content;
+            cout<<"\n\n     ["<<(profile[i].lik)<<"] likes this post";
+            cout<<"\n\n     comments";
+            for (int j=0;j<(profile[i].post_comments).size();++j)
+            {
+                cout<<"\n\n";
+                cout<<"   commented by <"<<(profile[i].post_comments)[j].user_name<<"> and his index ("<<(profile[i].post_comments)[j].user_index<<")";
+                cout<<"\n\n     "<<(profile[i].post_comments)[j].comment_content;
+            }
+        }
+        cout<<"\n\n\n1-go to home  2-see my friend list  3- see my groups list";
+        cout<<"\n4-see my friend requests link  5-make a post  6-refresh profile \n7-react on a post 8-logout\nenter your choice:\n";
+        while (1)
+        {
+            cin>>choice;
+            if (choice==1) //go to home
+            {
+                return 1;
+            }
+            else if (choice==2) //see my friend list
+            {
+                return 6;
+            }
+            else if (choice==3) //see my group list
+            {
+                return 5;
+            }
+            else if (choice==4) //see my friendrequests list
+            {
+                return 4;
+            }
+            else if  (choice==5) //make a post
+            {
+                this->post_on_profile();
+                return 2;
+            }
+            else if (choice==6) //refresh profile
+            {
+                return 2;
+            }
+            else if (choice==7)//react on a post on my profile
+            {
+                printf("\n choose number of post to react on:");
+                cin>>post_no_on_my_profile; //used in certain post state
+                return 7;
+            }
+            else if (choice==8) //log out
+            {
+                return 9;
+            }
+
+        }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    int show_X_profile()  /*osama*/
+    {
+         // this cout is at any list not here
+        //this cin is at any list not here
+        int choice;
+        cout<<"\nthis is ["<<no[no_of_profile_i_want_to_see].user_name<<"] profile";
+        deque <post> tmp = no[no_of_profile_i_want_to_see].profile;
+        for (int i=0;i<tmp.size();++i)
+        {
+            cout<<"\n\n\npost no "<<i;
+            cout<<"\n\nthis post is posted by <" <<tmp[i].user_name<<"> and his index ("<<tmp[i].user_index<<")";
+            cout<<"\n\n     "<<tmp[i].post_content;
+            cout<<"\n\n     ["<<(tmp[i].lik)<<"] likes this post";
+            cout<<"\n\n     comments";
+            for (int j=0;j<(tmp[i].post_comments).size();++j)
+            {
+                cout<<"\n\n";
+                cout<<"   commented by <"<<(tmp[i].post_comments)[j].user_name<<"> and his index ("<<(tmp[i].post_comments)[j].user_index<<")";
+                cout<<"\n\n     "<<(tmp[i].post_comments)[j].comment_content;
+            }
+        }
+        cout<<"\n\n\n1-go to home  2-see my friend list  3- see my groups list";
+        cout<<"\n4-see my friend requests link  5-make a post  6-refresh profile\n7-react on a post\nenter your choice:\n";
+        while (1)
+        {
+            cin>>choice;
+            if (choice==1) //go to home
+            {
+                return 1;
+            }
+            else if (choice==2) //see my friend list
+            {
+                return 6;
+            }
+            else if (choice==3) //see my group list
+            {
+                return 5;
+            }
+            else if (choice==4) //see my friendrequests list
+            {
+                return 4;
+            }
+            else if  (choice==5) //make a post
+            {
+                this->post_on_x_profile();
+                return 3;
+            }
+            else if (choice==6) //refresh profile
+            {
+                return 3;
+            }
+            else if (choice==7) //react on a post on x profile
+            {
+                printf("\n choose number of post to react on\n");
+                cin>>post_no_on_x_profile; //used in certain post state
+                return 7;
+            }
+        }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+ /*   int show_my_groups()
+    {
+
+    }*/
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    int show_my_friend_list()
+    {
+        int choice;
+        for (int i=0;i<friends_index.size();++i)
+        {
+            cout<<"\n"<<friends_index[i]<<"-"<<no[(friends_index[i])].user_name;
+        }
+        cout<<"\n1-visit a friend profile 2-go to home\nenter your choice:\n";
+        cin>>choice;
+        while (1)
+        {
+            if (choice==1)
+            {
+               cout<<"\nenter your the number of your friend:";
+               cin>>no_of_profile_i_want_to_see;
+                return 3;
+            }
+            if (choice==2)
+            {
+                return 1;
+            }
+
+        }
+
+    }
+ /////////////////////////////////////////////////////////////////////////////////////////////////////
+ user get_it ()
+ {
+     user tmps;
+     for (int i=0 ; i<home.size() ; ++i)
+     {
+         (tmps.home).push_back(home[i]);
+     }
+     for (int i=0;i<friends_index.size();++i)
+     {
+         for (int j=0 ;j<(no[(friends_index[i])].home).size();++j)
+         {
+             (tmps.home).push_back((no[(friends_index[i])].home)[j]);
+         }
+     }
+     return tmps;
+ }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+int show_the_chosen_post_from_home(user he_got_it_all)
+{
+        // the function will have 2 parameters which are  input_user_index and input_post_index
+
+        int input_user_index = index; /*WARNING... ana m7tag da ka input lel function */
+       int input_post_index =post_no_on_home; /*WARNING... ana m7tag da ka input lel function */
+        cout<<"\nthis post is posted by ["<<(he_got_it_all.home)[input_post_index].user_name<<"] and his index is["<<(he_got_it_all.home)[input_post_index].user_index<<"]";
+        cout<<"\n\n "<<((he_got_it_all.home)[input_post_index]).post_content; // print the post content
+        cout<<"\n\n  ["<<((he_got_it_all.home)[input_post_index]).lik<<"] Likes this post"; // print number of likes
+        cout<<"\n     ["<<((he_got_it_all.home)[input_post_index]).post_comments.size()<<"] Comments"; // print number of comments
+
+
+        // print all comments under the post
+        for(int i=0; i<(((he_got_it_all.home)[input_post_index]).post_comments).size(); i++)
+        {
+            cout<<"\n["<<(((he_got_it_all.home)[input_post_index]).post_comments)[i].user_name<<"]";
+            cout<<"\n       "<<((((he_got_it_all).home)[input_post_index]).post_comments)[i].comment_content;
+        }
+
+//choose to like or make a comment or exit
+    int choose = 0;
+    while(1)
+    {
+        cout<<"\nChoose 1 to like and 2 to comment and 3 to go to home\nneter your choice:"<<endl;
+        cin>>choose;
+        if(choose == 1) // adding new like to the post
+        {
+            int tmp_user_index=((he_got_it_all.home)[input_post_index]).user_index;
+            int tmp_post_index=((he_got_it_all.home)[input_post_index]).post_index;
+            (no[tmp_user_index].home)[tmp_post_index].lik++;
+            return 7;
+        }
+        else if (choose == 2)
+        {
+            int tmp_user_index = ((he_got_it_all.home)[input_post_index]).user_index;
+            int tmp_post_index = ((he_got_it_all.home)[input_post_index]).post_index;
+            comment new_comm;
+            new_comm.comment_index = ((no[tmp_user_index].home)[tmp_post_index].post_comments).size(); // index of the new comment
+            new_comm.user_index = index; /*WARNING.... I need the index of the user who commented*/;
+            new_comm.user_name = user_name; /*WARNING.... I need the name of the user who commented*/;
+
+            string comm_input;
+            cout<<"\nWrite your comment:"<<endl;
+            getline(cin,comm_input);
+            getline(cin,comm_input); //write here your comment
+            new_comm.comment_content = comm_input;
+            ((no[tmp_user_index].home)[tmp_post_index].post_comments).push_back(new_comm); //add the comment
+            return 7;
+        }
+        else if (choose == 3)
+            return 1;
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+    int show_suggested_friends()
+    {
+        int choice;
+        bool is_already_friend;
+        for (int i=0;i<no.size();++i)
+        {
+            is_already_friend=false;
+            if (no[i].index==index)
+            {
+                is_already_friend=true;
+            }
+            for (int j=0 ; j < friends_index.size(); ++j)
+            {
+                if (no[i].index==friends_index[j])
+                {
+                    is_already_friend=true;
+                }
+            }
+            if (!is_already_friend)
+            {
+                cout<<"\n"<<no[i].index<<"-"<<no[i].user_name;
+            }
+        }
+        cout<<"\n1-go to home 2-add friend\nenter your choice:";
+        cin>>choice;
+        while (1)
+        {
+            if (choice==1)
+            {
+                return 1;
+            }
+            else if (choice==2)
+            {
+                add_friend();
+                return 10;
+            }
+        }
+    }
+};
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+struct group
+{
+    int group_index;
+    string group_name;
+};
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+int show_program_users ()
+{
+    int tmp;
+    for (int i=0 ; i<no.size();++i)
+    {
+        cout <<no[i].index<<"-"<<no[i].user_name<<"\n";
+    }
+        printf ("          ******1-login******       ******2-create new account******\nchoose (1) or (2)\n");
+        cin>>tmp;
+    return tmp;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+int main()
+{
+    //freopen ("i.txt","rt",stdin);
+    user go;
+
+    int g_index;
+    int f_index;
+    int f_r_index;
+    //post
+    int po_ind;
+    int us_ind;
+    string us_nam;
+    string po_cont;
+    //comment
+    int us_index;
+    int comm_ind;
+    string us_name;
+    string comm_content;
+    //like
+    int l;
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+          ///loading
+    xmlDoc.LoadFile("SavedData.xml");
+    root=xmlDoc.FirstChild();
+    if (root!=nullptr)
+    {
+        pRoot=root->FirstChildElement("user");
+        int k=-1;
+        while (pRoot != nullptr)
+        {
+            no.push_back(go);
+            ++k;
+            ///loading user_name&&password
+            pElement = pRoot->FirstChildElement("user_name_and_password");
+            if (pElement != nullptr)
+            {
+                 no[k].user_name = pElement->Attribute("user_name");
+                 no[k].password = pElement->Attribute("password");
+                 pElement->QueryIntAttribute("index",&(no[k].index));
+            }
+
+            ///friends indexes
+            pElement = pRoot->FirstChildElement("friends_index");
+           if (pElement!=nullptr)
+           {
+                pListElement = pElement->FirstChildElement("f_index");
+           }
+            while (pListElement!=nullptr)
+            {
+                pListElement->QueryIntText(&f_index); //saved as element
+                (no[k].friends_index).push_back(f_index);
+                pListElement = pListElement->NextSiblingElement("f_index");
+            }
+            ///groups_index
+            pElement = pRoot->FirstChildElement("groups_index");
+            if (pElement!=nullptr)
+            {
+                pListElement = pElement->FirstChildElement("g_index");
+            }
+            while (pListElement!=nullptr)
+            {
+
+                pListElement->QueryIntText(&g_index);
+                (no[k].groups_index).push_back(g_index);
+                pListElement = pListElement->NextSiblingElement("g_index");
+            }
+            ///friend_requests_index
+         /*   pElement = pRoot->FirstChildElement("friend_requests_index");
+            if (pElement!=nullptr)
+            {
+                pListElement = pElement->FirstChildElement("f_r_index");
+            }
+            while (pListElement!=nullptr)
+            {
+                pListElement->QueryIntText(&f_r_index);
+                (no[k].friend_requests_index).push_back(f_r_index);
+                pListElement = pListElement->NextSiblingElement("f_r_index");
+            }*/
+            ///home_posts
+            pElement = pRoot->FirstChildElement("home");
+            if (pElement!=nullptr)
+            {
+                pListElement = pElement->FirstChildElement("post");
+            }
+            while(pListElement!=nullptr)
+            {
+                post tmp;
+                pListElement->QueryIntAttribute("post_ind", &po_ind);
+                tmp.post_index=po_ind;
+                pListElement->QueryIntAttribute("user_ind", &us_ind);
+                tmp.user_index=us_ind;
+                pListElement->QueryIntAttribute("no_of_likes", &l);
+                tmp.lik=l;
+                us_nam=pListElement->Attribute("user_name");
+                tmp.user_name=us_nam;
+                po_cont=pListElement->Attribute("post_content");
+                tmp.post_content=po_cont;
+                ///comment
+                pList_of_comment = pListElement->FirstChildElement("comment");
+                while (pList_of_comment!=nullptr)
+                {
+                    comment tmp_comment;
+                    pList_of_comment->QueryIntAttribute("comment_ind",&comm_ind);
+                    tmp_comment.comment_index=comm_ind;
+                    pList_of_comment->QueryIntAttribute("user_index",&us_index);
+                    tmp_comment.user_index=us_index;
+                    comm_content=pList_of_comment->Attribute("comment_content");
+                    tmp_comment.comment_content=comm_content;
+                    us_name=pList_of_comment->Attribute("user_name");
+                    tmp.user_name=us_name;
+                    (tmp.post_comments).push_back(tmp_comment);
+                    pList_of_comment = pList_of_comment->NextSiblingElement("comment");
+                }
+                (no[k].home).push_back(tmp);
+                pListElement=pListElement->NextSiblingElement("post");
+            }
+              ///profile_posts
+            pElement = pRoot->FirstChildElement("profile");
+            if (pElement!=nullptr)
+            {
+                pListElement = pElement->FirstChildElement("post");
+            }
+            while(pListElement!=nullptr)
+            {
+                post tmp;
+                pListElement->QueryIntAttribute("post_ind", &po_ind);
+                tmp.post_index=po_ind;
+                pListElement->QueryIntAttribute("user_ind", &us_ind);
+                tmp.user_index=us_ind;
+                pListElement->QueryIntAttribute("no_of_likes", &l);
+                tmp.lik=l;
+                us_nam=pListElement->Attribute("user_name");
+                tmp.user_name=us_nam;
+                po_cont=pListElement->Attribute("post_content");
+                tmp.post_content=po_cont;
+                ///comment
+                pList_of_comment = pListElement->FirstChildElement("comment");
+                while (pList_of_comment!=nullptr)
+                {
+                    comment tmp_comment;
+                    pList_of_comment->QueryIntAttribute("comment_ind",&comm_ind);
+                    tmp_comment.comment_index=comm_ind;
+                    pList_of_comment->QueryIntAttribute("user_index",&us_index);
+                    tmp_comment.user_index=us_index;
+                    comm_content=pList_of_comment->Attribute("comment_content");
+                    tmp_comment.comment_content=comm_content;
+                    us_name=pList_of_comment->Attribute("user_name");
+                    tmp.user_name=us_name;
+                    (tmp.post_comments).push_back(tmp_comment);
+                    pList_of_comment = pList_of_comment->NextSiblingElement("comment");
+                }
+                (no[k].profile).push_back(tmp);
+                pListElement = pListElement->NextSiblingElement("post");
+            }
+            pRoot = pRoot->NextSiblingElement("user");
+        }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+while (1)
+{
+        start:
+        int choice,index_of_user;
+        string user_name,password;
+        choice=show_program_users();
+        ///log in
+        if (choice==1)
+        {
+            string extra;
+            printf("\nenter your no from the list above:");
+            cin >> index_of_user;
+            printf ("\nenter_user_name:");
+            getline(cin,extra);
+        re_enter_user_name2:
+            getline(cin,user_name);
+            if (user_name==no[index_of_user].user_name)
+            {
+                printf("\nenter_password:");
+            re_enter_password2:
+                getline(cin,password);
+                if (password == no[index_of_user].password)
+                {
+                    state=1;
+                }
+                else
+                {
+                    printf("\nwrong password\nre_enter password:");
+                    goto re_enter_password2;
+                }
+            }
+            else
+            {
+                printf("\nwrong user name\nre_enter user name:");
+                goto re_enter_user_name2;
+            }
+            while (1)
+            {
+                if (state==1) //home page
+                {
+                   state=no[index_of_user].show_home();
+                }
+               else if (state==2) //my profile page
+               {
+                   state=no[index_of_user].show_my_profile();
+               }
+               else if (state==3)//someone profile
+               {
+                    state=no[index_of_user].show_X_profile();
+               }
+             /* else if (state==4)//friend requests page
+               {
+                   state=no[index_of_user].show_friend_request();
+               }*/
+              /* else if (state==5)//list of my groups
+               {
+                   state=no[index_of_user].show_my_groups();
+               }*/
+               else if (state==6)//list of my friends
+               {
+                   state=no[index_of_user].show_my_friend_list();
+               }
+               else if (state==7)//one post to react on
+               {
+                   user he_got_it_all;
+                   he_got_it_all=no[index_of_user].get_it();
+                   state=no[index_of_user].show_the_chosen_post_from_home(he_got_it_all);
+               }
+              /* else if (state==8) //group page
+               {
+                   state=no[index_of_user].show_my_group_page();
+               }*/
+               else if (state==9)//start page
+               {
+                   goto start;
+               }
+               else if (state==10)//suggested friends
+               {
+                   state=no[index_of_user].show_suggested_friends();
+               }
+            }
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if (choice==2) //create new account
+        {
+            user tmp;
+            string extra;
+            printf ("\nenter_unique_user_name:");
+            getline(cin,extra);
+            getline(cin,user_name);
+            for (int i = 0 ; i< no.size();++i)
+            {
+                if (user_name == no[i].user_name)
+                {
+                    printf("\nthat name is already taken\n");
+                   /**/ goto start;/**/
+                }
+            }
+            tmp.user_name = user_name;
+            printf ("\nenter password:");
+             getline(cin,password);
+             tmp.password=password;
+             tmp.index = no.size();
+             no.push_back(tmp);
+             if (root==nullptr) //if things get dark check it
+            {
+                root = xmlDoc.NewElement("social_Network");
+                xmlDoc.InsertFirstChild(root);
+            }
+             p_user_to_save = xmlDoc.NewElement("user");
+             root->InsertEndChild(p_user_to_save);
+             user_name_and_password=xmlDoc.NewElement("user_name_and_password");
+             const char * c = user_name.c_str();
+             user_name_and_password->SetAttribute("user_name",c);
+             c = password.c_str();
+             user_name_and_password->SetAttribute("password",c);
+             user_name_and_password->SetAttribute("index",tmp.index);
+             p_user_to_save->InsertEndChild(user_name_and_password);
+             xmlDoc.SaveFile("SavedData.xml");
+
+        }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+        else
+        {
+            printf ("\nplease enter no 1 or 2 only\n");
+        }
+}
+}
