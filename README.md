@@ -1,4 +1,4 @@
-# Social-Network-C-
+# Social-Network-C++
 C++  Social Network Program that has some basic functions such as:
 Create account
 Log in
